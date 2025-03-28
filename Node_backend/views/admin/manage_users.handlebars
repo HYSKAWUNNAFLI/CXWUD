@@ -1,0 +1,15 @@
+<h2>Quản lý Người dùng</h2>
+<table border="1">
+  <tr>
+    <th>ID</th>
+    <th>Username</th>
+    <th>Role</th>
+  </tr>
+  {{#each users}}
+  <tr>
+    <td>{{this.id}}</td>
+    <td>{{this.username}}</td>
+    <td>{{this.role}}</td>
+  </tr>
+  {{/each}}
+</table>

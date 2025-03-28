@@ -1,0 +1,22 @@
+<h2>Phân tích nội dung cuộc họp</h2>
+<form action="/meeting-tasks" method="POST">
+  <textarea name="text" rows="10" cols="80" placeholder="Nhập nội dung cuộc họp..."></textarea>
+  <br />
+  <button type="submit">Phân tích</button>
+</form>
+
+{{#if meeting_date}}
+  <h3>Ngày họp: {{meeting_date}}</h3>
+{{/if}}
+
+{{#if tasks}}
+  <h3>Danh sách công việc trích xuất:</h3>
+  <ul>
+    {{#each tasks}}
+      <li>
+        <b>{{assignee}}</b> - {{task_name}} 
+        {{#if due_date}} (Hạn: {{due_date}}) {{/if}}
+      </li>
+    {{/each}}
+  </ul>
+{{/if}}

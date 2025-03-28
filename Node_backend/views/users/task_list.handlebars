@@ -1,0 +1,19 @@
+<h2>Danh sách công việc</h2>
+<table border="1">
+  <tr>
+    <th>ID</th>
+    <th>Nội dung</th>
+    <th>Assignee</th>
+    <th>Deadline</th>
+    <th>Trạng thái</th>
+  </tr>
+  {{#each tasks}}
+  <tr>
+    <td>{{this.id}}</td>
+    <td>{{this.task_name}}</td>
+    <td>{{this.assignee}}</td>
+    <td>{{this.deadline}}</td>
+    <td>{{this.status}}</td>
+  </tr>
+  {{/each}}
+</table>
