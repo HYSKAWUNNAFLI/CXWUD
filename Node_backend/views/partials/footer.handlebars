@@ -1,0 +1,46 @@
+{{!-- partials/footer.handlebars --}}
+<footer class="bg-light py-4 mt-5">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <h5>
+          <i class="fas fa-calendar-check me-2"></i>Meeting Minutes Auto Generator
+        </h5>
+        <p class="text-muted">
+          Automatically generate meeting minutes and extract tasks from your meeting documents.
+        </p>
+      </div>
+      <div class="col-md-3">
+        <h5>Quick Links</h5>
+        <ul class="list-unstyled">
+          <li><a href="/" class="text-decoration-none">Dashboard</a></li>
+          <li><a href="/meetings" class="text-decoration-none">Meetings</a></li>
+          <li><a href="/tasks" class="text-decoration-none">Tasks</a></li>
+          {{#if user}}
+          <li><a href="/users/profile" class="text-decoration-none">Profile</a></li>
+          {{else}}
+          <li><a href="/auth/login" class="text-decoration-none">Login</a></li>
+          <li><a href="/auth/register" class="text-decoration-none">Register</a></li>
+          {{/if}}
+        </ul>
+      </div>
+      <div class="col-md-3">
+        <h5>Contact</h5>
+        <ul class="list-unstyled">
+          <li><i class="fas fa-envelope me-2"></i>support@meetingminutes.com</li>
+          <li><i class="fas fa-phone me-2"></i>(123) 456-7890</li>
+        </ul>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-md-6">
+        <p class="mb-0">&copy; {{currentYear}} Meeting Minutes Auto Generator. All rights reserved.</p>
+      </div>
+      <div class="col-md-6 text-md-end">
+        <a href="/legal/privacy" class="text-decoration-none me-3">Privacy Policy</a>
+        <a href="/legal/terms" class="text-decoration-none">Terms of Service</a>
+      </div>
+    </div>
+  </div>
+</footer> 

@@ -1,0 +1,142 @@
+{{!-- meetings/show.handlebars --}}
+<div class="container mt-4">
+  <div class="row mb-4">
+    <div class="col">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="/meetings">Meetings</a></li>
+          <li class="breadcrumb-item active">{{meeting.title}}</li>
+        </ol>
+      </nav>
+      <h2>
+        <i class="fas fa-calendar-alt me-2"></i>
+        {{meeting.title}}
+      </h2>
+      <p class="text-muted">
+        <i class="far fa-calendar me-1"></i>
+        {{formatDate meeting.meeting_date}}
+        <span class="badge bg-{{getStatusColor meeting.status}} ms-2">{{meeting.status}}</span>
+      </p>
+    </div>
+    <div class="col text-end">
+      <a href="/meetings" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Meetings
+      </a>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-file-alt me-2"></i>Meeting Content
+          </h5>
+        </div>
+        <div class="card-body">
+          <pre class="meeting-content">{{meeting.content}}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">
+            <i class="fas fa-tasks me-2"></i>Tasks
+          </h5>
+          <span class="badge bg-primary">{{meeting.tasks.length}} tasks</span>
+        </div>
+        <div class="card-body p-0">
+          <div class="list-group list-group-flush task-list">
+            {{#each meeting.tasks}}
+            <div class="list-group-item task-item {{toLowerCase this.status}}">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <h6 class="mb-1">{{this.task_name}}</h6>
+                  {{#if this.assignee}}
+                  <small class="text-muted">
+                    <i class="fas fa-user me-1"></i>
+                    {{this.assignee}}
+                  </small>
+                  {{/if}}
+                  {{#if this.deadline}}
+                  <br>
+                  <small class="text-muted">
+                    <i class="far fa-clock me-1"></i>
+                    Due: {{formatDate this.deadline}}
+                  </small>
+                  {{/if}}
+                </div>
+                <div class="text-end">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                      <span class="badge bg-{{getStatusColor this.status}}">{{this.status}}</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                      <li>
+                        <a class="dropdown-item status-toggle" href="#" data-task-id="{{this.id}}" data-status="TODO">
+                          <span class="badge bg-secondary">TODO</span>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item status-toggle" href="#" data-task-id="{{this.id}}" data-status="IN_PROGRESS">
+                          <span class="badge bg-primary">IN_PROGRESS</span>
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item status-toggle" href="#" data-task-id="{{this.id}}" data-status="COMPLETED">
+                          <span class="badge bg-success">COMPLETED</span>
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                  <br>
+                  <span class="badge bg-{{getPriorityColor this.priority}}">{{this.priority}}</span>
+                </div>
+              </div>
+            </div>
+            {{/each}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.meeting-content {
+  white-space: pre-wrap;
+  font-family: inherit;
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 0.25rem;
+  margin: 0;
+}
+
+.task-list {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.task-item {
+  border-left: 4px solid transparent;
+  transition: background-color 0.2s;
+}
+
+.task-item:hover {
+  background-color: #f8f9fa;
+}
+
+.task-item.todo {
+  border-left-color: #6c757d;
+}
+
+.task-item.in-progress {
+  border-left-color: #0d6efd;
+}
+
+.task-item.completed {
+  border-left-color: #198754;
+}
+</style> 

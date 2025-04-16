@@ -1,20 +1,27 @@
+// models/index.js
 const { sequelize } = require("../config/db");
-const User = require("./userModel")(sequelize);
-const Task = require("./taskModel")(sequelize);
-const MeetingLog = require("./meetingLogModel")(sequelize);
+const User = require("./userModel");
+const Task = require("./taskModel");
+const MeetingLog = require("./meetingLogModel");
 
-// Associations (quan hệ bảng)
-User.hasMany(MeetingLog, { foreignKey: "userId" });
-MeetingLog.belongsTo(User, { foreignKey: "userId" });
+// Initialize associations
+const models = {
+  User,
+  Task,
+  MeetingLog
+};
 
-User.hasMany(Task, { foreignKey: "assignedById" });
-Task.belongsTo(User, { foreignKey: "assignedById" });
+// Call associate methods if they exist
+Object.keys(models).forEach(modelName => {
+  if (models[modelName].associate) {
+    models[modelName].associate(models);
+  }
+});
 
-// v.v. tuỳ ý em
-
+// Export models
 module.exports = {
   sequelize,
   User,
   Task,
-  MeetingLog
+  MeetingLog,
 };

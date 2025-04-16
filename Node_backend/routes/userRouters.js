@@ -1,11 +1,17 @@
 const express = require("express");
 const router = express.Router();
-const { getAllUsers, updateUserRole } = require("../controllers/userController");
+const userController = require("../controllers/userController");
 const authMiddleware = require("../middleware/authMiddleware");
 const { authorizeRoles } = require("../middleware/roleMiddleware");
-const { ADMIN } = require("../config/role");
+const { PROJECT_MANAGER } = require("../config/role");
 
-router.get("/", authMiddleware, authorizeRoles([ADMIN]), getAllUsers);
-router.put("/:id/role", authMiddleware, authorizeRoles([ADMIN]), updateUserRole);
+// Project Manager routes
+router.get("/", authMiddleware, authorizeRoles([PROJECT_MANAGER]), userController.getAllUsers);
+router.put("/:id/role", authMiddleware, authorizeRoles([PROJECT_MANAGER]), userController.updateUserRole);
+
+// User profile routes
+router.get("/profile", authMiddleware, userController.getProfile);
+router.post("/profile", authMiddleware, userController.updateProfile);
+router.post("/change-password", authMiddleware, userController.changePassword);
 
 module.exports = router;

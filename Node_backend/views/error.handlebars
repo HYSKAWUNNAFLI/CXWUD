@@ -1,0 +1,25 @@
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-danger text-white">
+          <h2>Error</h2>
+        </div>
+        <div class="card-body">
+          <h3>{{message}}</h3>
+          <p>An error occurred while processing your request.</p>
+          
+          {{#if error}}
+            {{#if (eq process.env.NODE_ENV 'development')}}
+              <div class="alert alert-danger">
+                <pre>{{error}}</pre>
+              </div>
+            {{/if}}
+          {{/if}}
+          
+          <a href="/" class="btn btn-primary">Return to Home</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

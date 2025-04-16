@@ -1,0 +1,138 @@
+{{!-- meetings/index.handlebars --}}
+<div class="container mt-4">
+  <div class="row mb-4">
+    <div class="col">
+      <h2><i class="fas fa-calendar-alt me-2"></i>Meeting Minutes</h2>
+    </div>
+    <div class="col text-end">
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadMeetingModal">
+        <i class="fas fa-upload me-2"></i>Upload Meeting Minutes
+      </button>
+    </div>
+  </div>
+
+  {{#if meetings.length}}
+  <div class="row">
+    {{#each meetings}}
+    <div class="col-md-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="card-title mb-0">{{this.title}}</h5>
+            <small class="text-muted">
+              <i class="far fa-calendar me-1"></i>
+              {{formatDate this.meeting_date}}
+            </small>
+          </div>
+          <span class="badge bg-{{getStatusColor this.status}}">{{this.status}}</span>
+        </div>
+        <div class="card-body">
+          <p class="card-text">{{truncate this.content 200}}</p>
+          <h6 class="mt-3">
+            <i class="fas fa-tasks me-2"></i>Tasks
+          </h6>
+          <div class="task-list">
+            {{#each this.tasks}}
+            <div class="list-group-item task-item {{toLowerCase this.status}}">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{{this.task_name}}</strong>
+                  {{#if this.assignee}}
+                  <br>
+                  <small class="text-muted">
+                    <i class="fas fa-user me-1"></i>
+                    {{this.assignee}}
+                  </small>
+                  {{/if}}
+                </div>
+                <div class="text-end">
+                  <span class="badge bg-{{getStatusColor this.status}}">{{this.status}}</span>
+                  <br>
+                  <span class="badge bg-{{getPriorityColor this.priority}}">{{this.priority}}</span>
+                </div>
+              </div>
+            </div>
+            {{/each}}
+          </div>
+        </div>
+        <div class="card-footer">
+          <a href="/meetings/{{this.id}}" class="btn btn-sm btn-outline-primary">
+            <i class="fas fa-eye me-1"></i>View Details
+          </a>
+        </div>
+      </div>
+    </div>
+    {{/each}}
+  </div>
+  {{else}}
+  <div class="text-center py-5">
+    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+    <h4>No Meetings Found</h4>
+    <p class="text-muted">Upload your first meeting minutes to get started.</p>
+  </div>
+  {{/if}}
+</div>
+
+<!-- Upload Meeting Modal -->
+<div class="modal fade" id="uploadMeetingModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-upload me-2"></i>Upload Meeting Minutes
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="uploadMeetingForm" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="title" class="form-label">Meeting Title</label>
+            <input type="text" class="form-control" id="title" name="title" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Meeting Minutes File</label>
+            <div class="upload-area" onclick="document.getElementById('meeting_file').click()">
+              <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+              <p>Click or drag and drop to upload</p>
+              <small class="text-muted">Supported formats: .txt, .doc, .docx, .pdf</small>
+            </div>
+            <input type="file" class="d-none" id="meeting_file" name="meeting_file" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="uploadBtn">
+          <i class="fas fa-upload me-2"></i>Upload
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('uploadBtn').addEventListener('click', async () => {
+  const form = document.getElementById('uploadMeetingForm');
+  const formData = new FormData(form);
+
+  try {
+    showLoading();
+    const response = await fetch('/meetings', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (response.ok) {
+      window.location.reload();
+    } else {
+      const error = await response.json();
+      alert(error.message || 'Failed to upload meeting minutes');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Failed to upload meeting minutes');
+  } finally {
+    hideLoading();
+  }
+});
+</script> 
