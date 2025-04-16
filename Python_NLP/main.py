@@ -17,6 +17,7 @@ except OSError:
     subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
     nlp = spacy.load("en_core_web_sm")
 
+# === Models ===
 class TextInput(BaseModel):
     text: str
 
@@ -26,19 +27,24 @@ class Task(BaseModel):
     assignee: Optional[str] = None
     deadline: Optional[str] = None
 
+# === Routes ===
+
+@app.get("/")
+def root():
+    return {"message": "✅ FastAPI NLP Service is running!"}
+
 @app.post("/api/extract-tasks")
 async def extract_tasks(input_data: TextInput) -> List[Task]:
     try:
         doc = nlp(input_data.text)
         tasks = []
-        
-        # Simple rule-based task extraction
+
         task_patterns = [
             r"(?:need to|should|must|have to|will|going to)\s+([^.!?]+)[.!?]",
             r"(?:TODO|TASK|ACTION ITEM):\s*([^.!?]+)[.!?]",
             r"(?:assign|assigned to)\s+([^.!?]+)\s+(?:to|for)\s+([^.!?]+)[.!?]"
         ]
-        
+
         for pattern in task_patterns:
             matches = re.finditer(pattern, input_data.text, re.IGNORECASE)
             for match in matches:
@@ -46,12 +52,8 @@ async def extract_tasks(input_data: TextInput) -> List[Task]:
                     title = match.group(1).strip()
                 else:
                     title = f"{match.group(2).strip()} - {match.group(1).strip()}"
-                
-                tasks.append(Task(
-                    title=title,
-                    description=title
-                ))
-        
+                tasks.append(Task(title=title, description=title))
+
         return tasks
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -60,14 +62,7 @@ async def extract_tasks(input_data: TextInput) -> List[Task]:
 async def extract_dates(input_data: TextInput) -> List[str]:
     try:
         doc = nlp(input_data.text)
-        dates = []
-        
-        # Extract dates using spaCy's entity recognition
-        for ent in doc.ents:
-            if ent.label_ in ["DATE", "TIME"]:
-                dates.append(ent.text)
-        
-        return dates
+        return [ent.text for ent in doc.ents if ent.label_ in ["DATE", "TIME"]]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -75,17 +70,10 @@ async def extract_dates(input_data: TextInput) -> List[str]:
 async def extract_assignees(input_data: TextInput) -> List[str]:
     try:
         doc = nlp(input_data.text)
-        assignees = []
-        
-        # Extract person names using spaCy's entity recognition
-        for ent in doc.ents:
-            if ent.label_ == "PERSON":
-                assignees.append(ent.text)
-        
-        return assignees
+        return [ent.text for ent in doc.ents if ent.label_ == "PERSON"]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=5000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
