@@ -7,6 +7,7 @@ const cookieParser = require("cookie-parser");
 const { connectDB, sequelize } = require("./config/db");
 const handlebarsHelpers = require("./utils/handlebarsHelpers");
 const authMiddleware = require("./middleware/authMiddleware");
+const localsMiddleware = require("./middleware/localsMiddleware");
 
 // Connect to database
 connectDB();
@@ -21,13 +22,14 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+app.use(localsMiddleware);
 
 // Setup Handlebars
 app.engine("handlebars", exphbs.engine({ 
   defaultLayout: "main", 
   layoutsDir: path.join(__dirname, "views", "layouts"),
   helpers: handlebarsHelpers,
-  runtimeOptions: {
+  runtimeOptions: {//hhhhh
     allowProtoPropertiesByDefault: true,
     allowProtoMethodsByDefault: true
   }
@@ -42,6 +44,7 @@ const taskRoutes = require("./routes/taskRoutes");
 const uploadRouters = require("./routes/uploadRouters");
 const userRouters = require("./routes/userRouters");
 const legalRouters = require("./routes/legalRouters");
+const meetingMinutesRoutes = require("./routes/meetingMinutesRoutes");
 
 // Public routes
 app.use("/auth", authRoutes);
@@ -52,8 +55,7 @@ app.use("/meetings", authMiddleware, meetingLogRoutes);
 app.use("/tasks", authMiddleware, taskRoutes);
 app.use("/upload", authMiddleware, uploadRouters);
 app.use("/users", authMiddleware, userRouters);
-const localsMiddleware = require("./middleware/localsMiddleware");
-app.use(localsMiddleware);
+app.use("/meeting-minutes", authMiddleware, meetingMinutesRoutes);
 
 // Main route
 app.get("/", async (req, res) => {

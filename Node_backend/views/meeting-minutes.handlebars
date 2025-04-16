@@ -1,0 +1,68 @@
+{{> header}}
+
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-8 offset-md-2">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Upload Meeting Minutes</h3>
+        </div>
+        <div class="card-body">
+          <form action="/meeting-minutes/upload" method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="meetingMinutes" class="form-label">Select Meeting Minutes File</label>
+              <input type="file" class="form-control" id="meetingMinutes" name="meetingMinutes" accept=".txt,.doc,.docx" required>
+              <div class="form-text">Supported formats: .txt, .doc, .docx (Max size: 5MB)</div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="meetingId" class="form-label">Link to Meeting (Optional)</label>
+              <select class="form-select" id="meetingId" name="meetingId">
+                <option value="">Select a meeting</option>
+                {{#each meetings}}
+                <option value="{{this.id}}">{{this.title}} - {{formatDate this.date}}</option>
+                {{/each}}
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Upload Minutes</button>
+          </form>
+        </div>
+      </div>
+
+      {{#if meetingLogs}}
+      <div class="card mt-4">
+        <div class="card-header">
+          <h3 class="card-title">Recent Meeting Minutes</h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>File Name</th>
+                  <th>Upload Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{#each meetingLogs}}
+                <tr>
+                  <td>{{this.file_name}}</td>
+                  <td>{{formatDate this.createdAt}}</td>
+                  <td>
+                    <a href="/uploads/meeting-minutes/{{this.file_name}}" class="btn btn-sm btn-info" target="_blank">View</a>
+                  </td>
+                </tr>
+                {{/each}}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      {{/if}}
+    </div>
+  </div>
+</div>
+
+{{> footer}} 

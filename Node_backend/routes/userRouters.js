@@ -7,7 +7,7 @@ const { PROJECT_MANAGER } = require("../config/role");
 
 // Project Manager routes
 router.get("/", authMiddleware, authorizeRoles([PROJECT_MANAGER]), userController.getAllUsers);
-router.put("/:id/role", authMiddleware, authorizeRoles([PROJECT_MANAGER]), userController.updateUserRole);
+router.post("/:id/role", authMiddleware, authorizeRoles([PROJECT_MANAGER]), userController.updateUserRole);
 
 // User profile routes
 router.get("/profile", authMiddleware, userController.getProfile);

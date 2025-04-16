@@ -5,58 +5,95 @@
     <thead>
       <tr>
         <th>🆔 ID</th>
-        <th>👤 Username</th>
+        <th>👤 Name</th>
+        <th>📧 Email</th>
         <th>🛡️ Role</th>
+        <th>📝 Upload Minutes</th>
+        <th>💾 Actions</th>
       </tr>
     </thead>
     <tbody>
       {{#each users}}
       <tr>
-        <td>{{this.id}}</td>
-        <td>{{this.username}}</td>
-        <td>{{this.role}}</td>
+        <form method="POST" action="/users/{{this.id}}/role">
+          <td>{{this.id}}</td>
+          <td>{{this.name}}</td>
+          <td>{{this.email}}</td>
+          <td>
+            <select name="role">
+              <option value="TEAM_MEMBER" {{#if (eq this.role "TEAM_MEMBER")}}selected{{/if}}>Team Member</option>
+              <option value="PROJECT_MANAGER" {{#if (eq this.role "PROJECT_MANAGER")}}selected{{/if}}>Project Manager</option>
+            </select>
+          </td>
+          <td style="text-align: center;">
+            <input type="checkbox" name="can_upload_minutes" value="true" {{#if this.can_upload_minutes}}checked{{/if}}>
+          </td>
+          <td>
+            <button type="submit" class="btn btn-success btn-sm">Save</button>
+          </td>
+        </form>
       </tr>
       {{/each}}
     </tbody>
   </table>
 </div>
+
 <style>
   .user-title {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-  color: #1f2937; /* Slate-800 */
-}
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #1f2937;
+  }
 
-.table-container {
-  overflow-x: auto;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb; /* Gray-200 */
-  background-color: #ffffff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
+  .table-container {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
 
-.user-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+  .user-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
 
-.user-table thead {
-  background-color: #f9fafb; /* Gray-50 */
-  color: #374151; /* Gray-700 */
-}
+  .user-table thead {
+    background-color: #f9fafb;
+    color: #374151;
+  }
 
-.user-table th,
-.user-table td {
-  padding: 12px 16px;
-  text-align: left;
-  border-bottom: 1px solid #e5e7eb;
-}
+  .user-table th, .user-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+  }
 
-.user-table tbody tr:hover {
-  background-color: #f3f4f6; /* Gray-100 */
-  transition: background-color 0.2s ease;
-}
+  .user-table select {
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
 
+  .user-table input[type="checkbox"] {
+    transform: scale(1.2);
+  }
+
+  .btn {
+    padding: 4px 12px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .btn-success {
+    background-color: #22c55e;
+    color: white;
+  }
+
+  .btn-success:hover {
+    background-color: #16a34a;
+  }
 </style>
