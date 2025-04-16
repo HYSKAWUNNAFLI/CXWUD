@@ -1,52 +1,82 @@
 const { MeetingLog, Task, User } = require('../models');
 const nlpService = require('../services/nlpService');
+const fs = require('fs');
+const path = require('path');
+const { promisify } = require('util');
+const readFile = promisify(fs.readFile);
+const multer = require('multer');
+const axios = require('axios');
+const NLPService = require('../services/nlpService');
+const pdfParse = require('pdf-parse');
+const mammoth = require('mammoth');
+
+// Multer setup
+const upload = multer({ dest: 'uploads/' });
+exports.uploadMiddleware = upload.single('meeting_file');
+
+// Read file content depending on type
+async function extractTextFromFile(filePath, mimetype) {
+  if (mimetype === 'application/pdf') {
+    const data = await readFile(filePath);
+    const pdf = await pdfParse(data);
+    return pdf.text;
+  }
+
+  if (mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+    const data = await readFile(filePath);
+    const result = await mammoth.extractRawText({ buffer: data });
+    return result.value;
+  }
+
+  if (mimetype === 'text/plain') {
+    const data = await readFile(filePath, 'utf-8');
+    return data;
+  }
+
+  throw new Error('Unsupported file format');
+}
+
 
 class MeetingLogController {
     async create(req, res) {
         try {
-            const { title, content, file_name } = req.body;
+            const { title, content } = req.body;
             const user_id = req.user.id;
-
-            // Extract tasks and meeting date using NLP service
-            const extractedData = await nlpService.extractTasks(content);
-
-            // Create meeting log
-            const meetingLog = await MeetingLog.create({
-                title,
-                content,
-                file_name,
-                meeting_date: extractedData.meeting_date,
-                created_by: user_id,
-                status: 'PENDING'
-            });
-
-            // Create tasks from extracted data
-            if (extractedData.tasks && extractedData.tasks.length > 0) {
-                const tasks = extractedData.tasks.map(task => ({
-                    title: task.task_name,
-                    description: task.task_name,
-                    assignee_id: task.assignee,
-                    deadline: task.due_date,
-                    priority: 'MEDIUM',
-                    status: 'NOT_STARTED',
-                    meeting_id: meetingLog.id,
-                    created_by: user_id
-                }));
-
-                await Task.bulkCreate(tasks);
+        
+            if (!title || !content) {
+              return res.status(400).json({ message: 'Title and content are required' });
             }
-
-            res.status(201).json({
-                success: true,
-                data: meetingLog
+        
+            const extractedData = await NLPService.extractTasks(content);
+        
+            const meetingLog = await MeetingLog.create({
+              title,
+              content,
+              file_name: null,
+              meeting_date: extractedData.meeting_date || new Date(),
+              created_by: user_id,
+              status: 'PENDING'
             });
-        } catch (error) {
+        
+            if (extractedData.tasks?.length > 0) {
+              const tasks = extractedData.tasks.map(task => ({
+                title: task.task_name,
+                description: task.task_name,
+                assignee_id: task.assignee || null,
+                deadline: task.deadline || null,
+                priority: 'MEDIUM',
+                status: 'NOT_STARTED',
+                meeting_id: meetingLog.id,
+                created_by: user_id
+              }));
+              await Task.bulkCreate(tasks);
+            }
+        
+            res.status(201).json({ success: true, data: meetingLog });
+          } catch (error) {
             console.error('Error creating meeting log:', error);
-            res.status(500).json({
-                success: false,
-                error: 'Failed to create meeting log'
-            });
-        }
+            res.status(500).json({ success: false, message: 'Failed to create meeting log' });
+          }
     }
 
     async getAll(req, res) {

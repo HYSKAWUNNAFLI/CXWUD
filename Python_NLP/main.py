@@ -35,6 +35,7 @@ def root():
 
 @app.post("/api/extract-tasks")
 async def extract_tasks(input_data: TextInput) -> List[Task]:
+    print("Received Text:", input_data.text)
     try:
         doc = nlp(input_data.text)
         tasks = []

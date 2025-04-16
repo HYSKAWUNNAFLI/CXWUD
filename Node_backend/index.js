@@ -18,6 +18,7 @@ sequelize.sync({ alter: false }).then(() => {
 });
 
 const app = express();
+app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cookieParser());

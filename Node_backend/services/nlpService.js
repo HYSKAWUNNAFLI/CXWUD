@@ -2,18 +2,17 @@ const axios = require('axios');
 
 class NLPService {
   constructor() {
-    this.pythonServiceUrl = process.env.PYTHON_SERVICE_URL || 'http://localhost:5000';
+    this.pythonServiceUrl = 'http://localhost:8000';
   }
 
-  async extractTasks(text) {
+  async extractTasks(content) {
     try {
-      const response = await axios.post(`${this.pythonServiceUrl}/api/extract-tasks`, {
-        text: text
+      const response = await axios.post("http://localhost:8000/api/extract-tasks", {
+        text: content
       });
-
       return response.data;
     } catch (error) {
-      console.error('Error extracting tasks:', error);
+      console.error('Error extracting tasks:', error.response?.data || error.message);
       throw new Error('Failed to extract tasks from text');
     }
   }

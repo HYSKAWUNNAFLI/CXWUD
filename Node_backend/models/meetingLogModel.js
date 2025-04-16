@@ -32,7 +32,7 @@ const MeetingLog = sequelize.define("MeetingLog", {
     allowNull: true
   },
   status: {
-    type: DataTypes.ENUM('UPLOADED', 'PROCESSING', 'COMPLETED', 'FAILED'),
+    type: DataTypes.ENUM('UPLOADED', 'PROCESSING', 'COMPLETED', 'FAILED', 'PENDING'),
     defaultValue: 'UPLOADED'
   },
   processing_error: {
