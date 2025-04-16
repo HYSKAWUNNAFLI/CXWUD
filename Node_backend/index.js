@@ -52,6 +52,8 @@ app.use("/meetings", authMiddleware, meetingLogRoutes);
 app.use("/tasks", authMiddleware, taskRoutes);
 app.use("/upload", authMiddleware, uploadRouters);
 app.use("/users", authMiddleware, userRouters);
+const localsMiddleware = require("./middleware/localsMiddleware");
+app.use(localsMiddleware);
 
 // Main route
 app.get("/", async (req, res) => {
