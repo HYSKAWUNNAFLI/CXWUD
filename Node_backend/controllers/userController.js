@@ -17,25 +17,36 @@ exports.updateUserRole = async (req, res) => {
   try {
     const { id } = req.params;
     const { role, can_upload_minutes } = req.body;
-    
-    // Validate role
-    if (role !== PROJECT_MANAGER && role !== TEAM_MEMBER) {
-      return res.status(400).json({ message: "Invalid role" });
+
+    const allowedRoles = ['PROJECT_MANAGER', 'TEAM_MEMBER', 'VIEWER'];
+
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).render('error', { title: 'Lỗi', message: 'Vai trò không hợp lệ' });
     }
-    
+
     const user = await User.findByPk(id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) {
+      return res.status(404).render('error', { title: 'Không tìm thấy', message: 'Không tìm thấy người dùng' });
+    }
 
     user.role = role;
     user.can_upload_minutes = can_upload_minutes === 'true';
     await user.save();
 
-    res.json({ message: "User role updated", user });
+    res.render('users/roleUpdated', {
+      title: 'Cập nhật thành công',
+      user: user.get({ plain: true })
+    });
+
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Error updating user role" });
+    res.status(500).render('error', {
+      title: 'Lỗi server',
+      message: 'Đã xảy ra lỗi khi cập nhật vai trò người dùng'
+    });
   }
 };
+
 
 // Get user profile
 exports.getProfile = async (req, res) => {
