@@ -3,13 +3,13 @@ const { Task, User, MeetingLog } = require('../models');
 class TaskController {
     async create(req, res) {
         try {
-            const { task_name, description, assignee, deadline, priority, meeting_id } = req.body;
+            const { task_name, description, assignee_name, deadline, priority, meeting_id } = req.body;
             const user_id = req.user.id;
 
             const task = await Task.create({
                 task_name,
                 description,
-                assignee,
+                assignee_name,
                 deadline,
                 priority: priority || 'MEDIUM',
                 status: 'PENDING',
@@ -39,11 +39,7 @@ class TaskController {
                         as: 'meetingLog',
                         attributes: ['id', 'title', 'meeting_date']
                     },
-                    {
-                        model: User,
-                        as: 'assignee',
-                        attributes: ['id', 'name', 'email']
-                    },
+                    
                     {
                         model: User,
                         as: 'creator',
@@ -112,11 +108,7 @@ class TaskController {
                         as: 'meetingLog',
                         attributes: ['id', 'title', 'meeting_date', 'content']
                     },
-                    {
-                        model: User,
-                        as: 'assignee',
-                        attributes: ['id', 'name', 'email']
-                    },
+                 
                     {
                         model: User,
                         as: 'creator',
@@ -199,7 +191,7 @@ class TaskController {
             await task.update({
                 task_name: task_name || task.task_name,
                 description: description || task.description,
-                assignee: assignee || task.assignee,
+                assignee_name: assignee || task.assignee,
                 deadline: deadline || task.deadline,
                 priority: priority || task.priority,
                 status: status || task.status

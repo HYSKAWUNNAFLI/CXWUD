@@ -63,10 +63,7 @@ User.associate = (models) => {
     as: 'meetingLogs'
   });
   
-  User.hasMany(models.Task, {
-    foreignKey: 'assignee_id',
-    as: 'assignedTasks'
-  });
+  
   
   User.hasMany(models.Task, {
     foreignKey: 'created_by',

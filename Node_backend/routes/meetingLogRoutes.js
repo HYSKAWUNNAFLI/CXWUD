@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const meetingLogController = require('../controllers/meetingLogController');
+
 const authMiddleware = require('../middleware/authMiddleware');
+const meetingLogController = require('../controllers/meetingLogController');
 
 // All routes require authentication
 router.use(authMiddleware);
+router.post('/', meetingLogController.uploadMiddleware, meetingLogController.create);
 
-// Create a new meeting log
-router.post('/', meetingLogController.create);
+
 
 // Get all meeting logs
 router.get('/', meetingLogController.getAll);

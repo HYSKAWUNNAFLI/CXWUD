@@ -14,9 +14,9 @@ const Task = sequelize.define('Task', {
     description: {
         type: DataTypes.TEXT,
         allowNull: true
-    },
-    assignee_id: {
-        type: DataTypes.INTEGER,
+    },  
+    assignee_name: {
+        type: DataTypes.STRING,
         allowNull: true
     },
     deadline: {
@@ -28,7 +28,7 @@ const Task = sequelize.define('Task', {
         defaultValue: 'MEDIUM'
     },
     status: {
-        type: DataTypes.ENUM('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED'),
+        type: DataTypes.ENUM('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED','TODO'),
         defaultValue: 'NOT_STARTED'
     },
     meeting_id: {
@@ -64,10 +64,7 @@ Task.associate = (models) => {
         as: 'meetingLog'
     });
     
-    Task.belongsTo(models.User, {
-        foreignKey: 'assignee_id',
-        as: 'assignee'
-    });
+ 
     
     Task.belongsTo(models.User, {
         foreignKey: 'created_by',
