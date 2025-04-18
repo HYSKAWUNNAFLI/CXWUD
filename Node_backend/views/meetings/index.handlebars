@@ -4,11 +4,13 @@
     <div class="col">
       <h2><i class="fas fa-calendar-alt me-2"></i>Meeting Minutes</h2>
     </div>
+    {{#if (eq user.role 'PROJECT_MANAGER')}}
     <div class="col text-end">
       <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadMeetingModal">
         <i class="fas fa-upload me-2"></i>Upload Meeting Minutes
       </button>
     </div>
+    {{/if}}
   </div>
 
   {{#if meetings.length}}

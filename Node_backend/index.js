@@ -45,7 +45,7 @@ const taskRoutes = require("./routes/taskRoutes");
 const uploadRouters = require("./routes/uploadRouters");
 const userRouters = require("./routes/userRouters");
 const legalRouters = require("./routes/legalRouters");
-const meetingMinutesRoutes = require("./routes/meetingMinutesRoutes");
+
 
 // Public routes
 app.use("/auth", authRoutes);
@@ -56,7 +56,7 @@ app.use("/meetings", authMiddleware, meetingLogRoutes);
 app.use("/tasks", authMiddleware, taskRoutes);
 app.use("/upload", authMiddleware, uploadRouters);
 app.use("/users", authMiddleware, userRouters);
-app.use("/meeting-minutes", authMiddleware, meetingMinutesRoutes);
+
 
 // Main route
 app.get("/", async (req, res) => {
