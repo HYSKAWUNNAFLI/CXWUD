@@ -97,8 +97,8 @@
           <div class="row mb-3">
             <div class="col-md-3 fw-bold">Assignee:</div>
             <div class="col-md-9">
-              {{#if task.assignee}}
-              {{task.assignee.name}} ({{task.assignee.email}})
+              {{#if task.assignee_name}}
+              {{task.assignee_name}} 
               {{else}}
               <span class="text-muted">Unassigned</span>
               {{/if}}
@@ -192,7 +192,7 @@
               <select class="form-select" id="assignee" name="assignee">
                 <option value="">Select an assignee</option>
                 {{#each users}}
-                <option value="{{this.id}}" {{#if (eq this.id ../task.assignee_id)}}selected{{/if}}>{{this.name}}</option>
+                <option value="{{this.name}}" {{#if (eq this.name ../task.assignee_name)}}selected{{/if}}>{{this.name}}</option>
                 {{/each}}
               </select>
             </div>

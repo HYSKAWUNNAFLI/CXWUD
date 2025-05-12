@@ -1,0 +1,9 @@
+Cuộc họp bắt đầu lúc 9 giờ sáng ngày 15 tháng 4 năm 2025, dưới sự chủ trì của chị Trần Thị Mai – quản lý dự án. Cuộc họp diễn ra trực tuyến qua Zoom, với sự tham gia đầy đủ của các thành viên nhóm phát triển.
+
+Mở đầu cuộc họp, chị Mai tổng kết tiến độ làm việc tuần trước. Giao diện chức năng “Upload Biên bản họp” đã được hoàn thiện bởi bạn Trần Thị B, trong khi backend xử lý tạo biên bản đã được Nguyễn Văn A hoàn thành. Tuy nhiên, còn thiếu phần tích hợp trí tuệ nhân tạo để tóm tắt nội dung và phân tích nhiệm vụ.
+
+Tiếp theo, các thành viên báo cáo một số lỗi kỹ thuật. Bạn Lê Quang Hưng phát hiện lỗi khi upload file .docx trên máy Mac – lỗi có thể nằm ở phần cấu hình middleware. Bên cạnh đó, một số API trả về lỗi do gọi sai tên hàm callGemini, nhưng đã được sửa lại bằng cách import đúng từ geminiService.
+
+Chị Mai giao nhiệm vụ mới: Nguyễn Văn A tiếp tục tích hợp Google Gemini API để phân tích nội dung và sinh các nhiệm vụ tự động từ biên bản. Bạn Hưng sẽ tập trung sửa lỗi upload tài liệu. Trần Thị B được giao hoàn thiện phần hiển thị chi tiết biên bản trong giao diện người dùng.
+
+Cuối cuộc họp, cả nhóm thống nhất sẽ hoàn thiện tính năng trước ngày 20 tháng 4, để chuẩn bị cho buổi demo với giảng viên vào ngày 23 tháng 4. Buổi họp kết thúc lúc 10 giờ 30 phút sáng cùng ngày.

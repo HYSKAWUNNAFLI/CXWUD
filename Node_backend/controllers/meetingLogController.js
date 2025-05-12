@@ -1,19 +1,38 @@
 const { MeetingLog, Task, User } = require('../models');
-const nlpService = require('../services/nlpService');
 const fs = require('fs');
 const path = require('path');
 const { promisify } = require('util');
 const readFile = promisify(fs.readFile);
 const multer = require('multer');
 const axios = require('axios');
-const NLPService = require('../services/nlpService');
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
+const geminiService = require('../services/geminiService');
+
+
 
 // Multer setup
 const upload = multer({ dest: 'uploads/' });
-exports.uploadMiddleware = upload.single('meeting_file');
 
+async function extractTextFromFile(filePath, mimetype) {
+    if (mimetype === 'application/pdf') {
+      const data = await readFile(filePath);
+      const pdf = await pdfParse(data);
+      return pdf.text;
+    }
+  
+    if (mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      const data = await readFile(filePath);
+      const result = await mammoth.extractRawText({ buffer: data });
+      return result.value;
+    }
+  
+    if (mimetype === 'text/plain') {
+      return await readFile(filePath, 'utf-8');
+    }
+  
+    throw new Error('Unsupported file type');
+  }
 // Read file content depending on type
 async function extractTextFromFile(filePath, mimetype) {
   if (mimetype === 'application/pdf') {
@@ -35,50 +54,68 @@ async function extractTextFromFile(filePath, mimetype) {
 
   throw new Error('Unsupported file format');
 }
-
+function determinePriority(taskName = '') {
+    const lower = taskName.toLowerCase();
+    if (lower.includes('urgent') || lower.includes('critical')) return 'HIGH';
+    if (lower.includes('important') || lower.includes('optimize')) return 'MEDIUM';
+    return 'LOW';
+  }
+  
 
 class MeetingLogController {
+    uploadMiddleware = upload.single('meeting_file'); // thêm ở trong class
     async create(req, res) {
         try {
-            const { title, content } = req.body;
-            const user_id = req.user.id;
-        
-            if (!title || !content) {
-              return res.status(400).json({ message: 'Title and content are required' });
-            }
-        
-            const extractedData = await NLPService.extractTasks(content);
-        
-            const meetingLog = await MeetingLog.create({
-              title,
-              content,
-              file_name: null,
-              meeting_date: extractedData.meeting_date || new Date(),
-              created_by: user_id,
-              status: 'PENDING'
-            });
-        
-            if (extractedData.tasks?.length > 0) {
-              const tasks = extractedData.tasks.map(task => ({
-                title: task.task_name,
-                description: task.task_name,
-                assignee_id: task.assignee || null,
-                deadline: task.deadline || null,
-                priority: 'MEDIUM',
-                status: 'NOT_STARTED',
-                meeting_id: meetingLog.id,
-                created_by: user_id
-              }));
-              await Task.bulkCreate(tasks);
-            }
-        
-            res.status(201).json({ success: true, data: meetingLog });
-          } catch (error) {
-            console.error('Error creating meeting log:', error);
-            res.status(500).json({ success: false, message: 'Failed to create meeting log' });
+          const { title, content } = req.body;
+          const user_id = req.user.id;
+      
+          let text = content;
+          if (!text && req.file) {
+            text = await extractTextFromFile(req.file.path, req.file.mimetype);
           }
-    }
-
+      
+          if (!text || !title) {
+            return res.status(400).json({ message: 'Thiếu tiêu đề hoặc nội dung cuộc họp' });
+          }
+      
+          // ✅ Gọi Gemini để trích xuất
+          const { summary, tasks } = await geminiService.callGemini(text);
+      
+          // ✅ Tạo meeting log
+          const log = await MeetingLog.create({
+            title,
+            content: text,
+            file_name: req.file?.originalname || null,
+            meeting_date: new Date(),
+            created_by: user_id,
+            status: 'PENDING'
+          });
+      
+          // ✅ Ghi tasks vào DB nếu có
+          if (tasks?.length > 0) {
+            const formattedTasks = tasks.map(t => ({
+              title: t.task_name,
+              description: t.task_name,
+              assignee_name: t.assignee_name || t.assignee || 'Unassigned',
+              deadline: t.deadline || null,
+              priority: t.priority || 'MEDIUM',
+              status: 'NOT_STARTED',
+              meeting_id: log.id,
+              created_by: user_id
+            }));
+      
+            await Task.bulkCreate(formattedTasks);
+          }
+      
+          res.redirect('/meetings');
+      
+        } catch (err) {
+          console.error('❌ Error creating meeting log:', err);
+          res.status(500).render('error', { title: 'Lỗi', message: 'Không thể xử lý nội dung' });
+        }
+      }
+      
+      
     async getAll(req, res) {
         try {
             const meetingLogs = await MeetingLog.findAll({
@@ -86,14 +123,9 @@ class MeetingLogController {
                     {
                         model: Task,
                         as: 'tasks',
-                        attributes: ['id', 'title', 'status', 'priority', 'deadline'],
-                        include: [
-                            {
-                                model: User,
-                                as: 'assignee',
-                                attributes: ['id', 'name', 'email']
-                            }
-                        ]
+                        attributes: ['id', 'title', 'status', 'priority', 'deadline','assignee_name'],
+                        
+                        
                     },
                     {
                         model: User,
@@ -148,11 +180,7 @@ class MeetingLogController {
                         as: 'tasks',
                         attributes: ['id', 'title', 'description', 'status', 'priority', 'deadline', 'created_at'],
                         include: [
-                            {
-                                model: User,
-                                as: 'assignee',
-                                attributes: ['id', 'name', 'email']
-                            },
+                            
                             {
                                 model: User,
                                 as: 'creator',
@@ -240,42 +268,44 @@ class MeetingLogController {
             }
 
             // If content is updated, re-extract tasks
+            let newContent = content || meetingLog.content;
+            let tasks = [];
+            
             if (content && content !== meetingLog.content) {
-                const extractedData = await nlpService.extractTasks(content);
-                
-                // Update meeting date if extracted
-                if (extractedData.meeting_date) {
-                    meetingLog.meeting_date = extractedData.meeting_date;
-                }
-
-                // Delete existing tasks
-                await Task.destroy({
-                    where: { meeting_id: id }
-                });
-
-                // Create new tasks
-                if (extractedData.tasks && extractedData.tasks.length > 0) {
-                    const tasks = extractedData.tasks.map(task => ({
-                        title: task.task_name,
-                        description: task.task_name,
-                        assignee_id: task.assignee,
-                        deadline: task.due_date,
-                        priority: 'MEDIUM',
-                        status: 'NOT_STARTED',
-                        meeting_id: id,
-                        created_by: meetingLog.created_by
-                    }));
-
-                    await Task.bulkCreate(tasks);
-                }
+              const extracted = await geminiService.callGemini(content);
+              tasks = extracted.tasks || [];
+            
+              await Task.destroy({ where: { meeting_id: id } });
+            
+              const users = await User.findAll({ attributes: ['id', 'name'] });
+            
+              const newTasks = tasks.map(t => {
+                const matchedUser = users.find(
+                  u => u.name.toLowerCase() === (t.assignee || '').toLowerCase()
+                );
+                return {
+                  title: t.task_name,
+                  description: t.task_name,
+                  deadline: t.deadline || null,
+                  priority: t.priority || determinePriority(t.task_name),
+                  status: t.status === 'TODO' ? 'NOT_STARTED' : (t.status || 'NOT_STARTED'),
+                  assignee_name: matchedUser ? matchedUser.id : null,
+                  meeting_id: id,
+                  created_by: meetingLog.created_by
+                };
+              });
+            
+              await Task.bulkCreate(newTasks);
             }
+            
 
             // Update meeting log
             await meetingLog.update({
                 title: title || meetingLog.title,
-                content: content || meetingLog.content,
+                content: newContent,
                 status: status || meetingLog.status
-            });
+              });
+              
 
             res.json({
                 success: true,

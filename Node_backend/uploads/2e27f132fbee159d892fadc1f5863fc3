@@ -1,0 +1,10 @@
+The meeting started at 9:00 AM on April 15, 2025, chaired by Emily Johnson – the project manager. It was conducted online via Zoom with full attendance from the development team members.
+
+At the beginning of the meeting, Emily summarized the progress from the previous week. The “Upload Meeting Minutes” interface was completed by Sophia Lee, while the backend functionality for creating meeting records was completed by Daniel Smith. However, the integration of artificial intelligence to summarize content and analyze tasks is still missing.
+
+Next, the team reported several technical issues. Kevin Brown discovered a bug when uploading .docx files on macOS – likely caused by middleware configuration. Additionally, some APIs returned errors due to incorrect usage of the callGemini function, which was later fixed by properly importing from geminiService.
+
+Emily assigned new tasks: Daniel will continue integrating the Google Gemini API to analyze the meeting content and automatically generate tasks. Kevin will focus on fixing the file upload issue. Sophia was assigned to complete the user interface for displaying detailed meeting records.
+
+At the end of the meeting, the team agreed to finalize all features by April 20 in preparation for the demo session with the instructor on April 23. The meeting concluded at 10:30 AM on the same day.
+

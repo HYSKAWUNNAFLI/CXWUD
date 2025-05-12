@@ -76,20 +76,18 @@ The application will be available at `http://localhost:3000`
 
 ## Default Users
 
-
-- Project Managers:
-    Email: pm1@example.com
-    Password: Password123!
-    
-    Email: pm2@example.com
-    Password: Password123!
-- Team Members:
-    Email: tm1@example.com
-    Password: Password123!
-    Email: tm2@example.com
-    Password: Password123!
-    Email: tm3@example.com
-    Password: Password123!
+Project Managers:
+Email: pm1@example.com
+Password: Password123!
+Email: pm2@example.com
+Password: Password123!
+Team Members:
+Email: tm1@example.com
+Password: Password123!
+Email: tm2@example.com
+Password: Password123!
+Email: tm3@example.com
+Password: Password123!
 
 ## API Documentation
 
