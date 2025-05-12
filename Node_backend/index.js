@@ -9,15 +9,16 @@ const handlebarsHelpers = require("./utils/handlebarsHelpers");
 const authMiddleware = require("./middleware/authMiddleware");
 const localsMiddleware = require("./middleware/localsMiddleware");
 
-// Connect to database
-connectDB();
+// Khởi tạo ứng dụng Express
+const app = express();
 
-// Sync models
+// Kết nối cơ sở dữ liệu và đồng bộ hóa mô hình
+connectDB();
 sequelize.sync({ alter: false }).then(() => {
   console.log("✅ Sequelize sync done.");
 });
 
-const app = express();
+// Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -30,7 +31,7 @@ app.engine("handlebars", exphbs.engine({
   defaultLayout: "main", 
   layoutsDir: path.join(__dirname, "views", "layouts"),
   helpers: handlebarsHelpers,
-  runtimeOptions: {//hhhhh
+  runtimeOptions: {
     allowProtoPropertiesByDefault: true,
     allowProtoMethodsByDefault: true
   }
@@ -44,24 +45,17 @@ const meetingLogRoutes = require("./routes/meetingLogRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const uploadRouters = require("./routes/uploadRouters");
 const userRouters = require("./routes/userRouters");
-const legalRouters = require("./routes/legalRouters");
-const meetingMinutesRoutes = require("./routes/meetingMinutesRoutes");
 
-// Public routes
+// Cấu hình các routes
 app.use("/auth", authRoutes);
-app.use("/", legalRouters);
-
-// Protected routes
 app.use("/meetings", authMiddleware, meetingLogRoutes);
 app.use("/tasks", authMiddleware, taskRoutes);
 app.use("/upload", authMiddleware, uploadRouters);
 app.use("/users", authMiddleware, userRouters);
-app.use("/meeting-minutes", authMiddleware, meetingMinutesRoutes);
 
 // Main route
 app.get("/", async (req, res) => {
   try {
-    // Get user data if logged in
     let user = null;
     if (req.cookies.token) {
       const jwt = require("jsonwebtoken");
@@ -70,7 +64,6 @@ app.get("/", async (req, res) => {
       user = await User.findByPk(decoded.id);
     }
 
-    // Get recent meetings and tasks if user is logged in
     let recentMeetings = [];
     let recentTasks = [];
     if (user) {
@@ -86,7 +79,6 @@ app.get("/", async (req, res) => {
         limit: 5
       });
 
-      // Convert to plain objects
       recentMeetings = recentMeetings.map(m => m.get({ plain: true }));
       recentTasks = recentTasks.map(t => t.get({ plain: true }));
     }
@@ -116,7 +108,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server
+// Khởi tạo server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);

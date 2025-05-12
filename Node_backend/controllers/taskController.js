@@ -4,7 +4,7 @@ class TaskController {
     async create(req, res) {
         try {
             const { task_name, description, assignee, deadline, priority, meeting_id } = req.body;
-            const user_id = req.user.id;
+            const user_id = req.user.id;  // Đảm bảo rằng req.user được xác định từ authMiddleware
 
             const task = await Task.create({
                 task_name,
@@ -69,7 +69,6 @@ class TaskController {
             const plainUsers = users.map(user => user.get({ plain: true }));
             const plainMeetings = meetings.map(meeting => meeting.get({ plain: true }));
 
-            // Check if the request is expecting JSON (API call)
             if (req.headers.accept && req.headers.accept.includes('application/json')) {
                 return res.json({
                     success: true,
@@ -77,7 +76,6 @@ class TaskController {
                 });
             }
 
-            // Render the Handlebars template
             res.render('tasks/index', {
                 title: 'Tasks',
                 tasks: plainTasks,
@@ -86,16 +84,12 @@ class TaskController {
             });
         } catch (error) {
             console.error('Error getting tasks:', error);
-            
-            // Check if the request is expecting JSON (API call)
             if (req.headers.accept && req.headers.accept.includes('application/json')) {
                 return res.status(500).json({
                     success: false,
                     error: 'Failed to get tasks'
                 });
             }
-            
-            // Render the Handlebars template with error
             res.render('tasks/index', {
                 title: 'Tasks',
                 error: 'Failed to load tasks'
@@ -126,31 +120,25 @@ class TaskController {
             });
 
             if (!task) {
-                // Check if the request is expecting JSON (API call)
                 if (req.headers.accept && req.headers.accept.includes('application/json')) {
                     return res.status(404).json({
                         success: false,
                         error: 'Task not found'
                     });
                 }
-                
-                // Render the Handlebars template with error
                 return res.render('error', {
                     title: 'Task Not Found',
                     message: 'The requested task could not be found'
                 });
             }
 
-            // Get all users for the assignee dropdown
             const users = await User.findAll({
                 attributes: ['id', 'name', 'email']
             });
 
-            // Convert to plain objects
             const plainTask = task.get({ plain: true });
             const plainUsers = users.map(user => user.get({ plain: true }));
 
-            // Check if the request is expecting JSON (API call)
             if (req.headers.accept && req.headers.accept.includes('application/json')) {
                 return res.json({
                     success: true,
@@ -158,7 +146,6 @@ class TaskController {
                 });
             }
 
-            // Render the Handlebars template
             res.render('tasks/show', {
                 title: plainTask.title,
                 task: plainTask,
@@ -166,16 +153,12 @@ class TaskController {
             });
         } catch (error) {
             console.error('Error getting task:', error);
-            
-            // Check if the request is expecting JSON (API call)
             if (req.headers.accept && req.headers.accept.includes('application/json')) {
                 return res.status(500).json({
                     success: false,
                     error: 'Failed to get task'
                 });
             }
-            
-            // Render the Handlebars template with error
             res.render('error', {
                 title: 'Error',
                 message: 'Failed to load task'
@@ -219,7 +202,7 @@ class TaskController {
         }
     }
 
-    async delete(req, res) {
+    async deleteTask(req, res) {
         try {
             const { id } = req.params;
             const task = await Task.findByPk(id);
