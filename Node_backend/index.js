@@ -8,6 +8,7 @@ const { connectDB, sequelize } = require("./config/db");
 const handlebarsHelpers = require("./utils/handlebarsHelpers");
 const authMiddleware = require("./middleware/authMiddleware");
 const localsMiddleware = require("./middleware/localsMiddleware");
+const cors = require("cors");
 
 // Khởi tạo ứng dụng Express
 const app = express();
@@ -19,13 +20,12 @@ sequelize.sync({ alter: false }).then(() => {
 });
 
 // Middleware
+app.use(cors());
 app.use(express.urlencoded({ extended: true }));
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(localsMiddleware);
-
+app.use(express.json());
 // Setup Handlebars
 app.engine("handlebars", exphbs.engine({ 
   defaultLayout: "main", 
@@ -42,15 +42,15 @@ app.set("views", path.join(__dirname, "views"));
 // Import routes
 const authRoutes = require("./routes/authRoutes");
 const meetingLogRoutes = require("./routes/meetingLogRoutes");
-const uploadRouters = require("./routes/uploadRouters");
 const userRouters = require("./routes/userRouters");
-
+const taskRoutes = require("./routes/taskRoutes");
+const trelloRoutes = require('./routes/trelloRoutes');
 // Cấu hình các routes
 app.use("/auth", authRoutes);
 app.use("/meetings", authMiddleware, meetingLogRoutes);
-app.use("/upload", authMiddleware, uploadRouters);
+app.use("/tasks", taskRoutes);
 app.use("/users", authMiddleware, userRouters);
-
+app.use('/trello', trelloRoutes);
 // Main route
 app.get("/", async (req, res) => {
   try {

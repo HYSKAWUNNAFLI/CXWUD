@@ -1,93 +1,90 @@
+// services/trelloService.js
 const axios = require('axios');
+require('dotenv').config();
 
-class TrelloService {
-    constructor() {
-        this.apiKey = process.env.TRELLO_API_KEY;
-        this.token = process.env.TRELLO_TOKEN;
-        this.baseUrl = 'https://api.trello.com/1';
-    }
+const API_KEY = process.env.TRELLO_API_KEY?.trim();
+const API_TOKEN = process.env.TRELLO_API_TOKEN?.trim();
+const BASE_URL = 'https://api.trello.com/1';
 
-    async createCard(task) {
-        try {
-            const response = await axios.post(`${this.baseUrl}/cards`, {
-                key: this.apiKey,
-                token: this.token,
-                idList: task.trello_list_id,
-                name: task.title,
-                desc: task.description,
-                due: task.deadline ? new Date(task.deadline).toISOString() : null
-            });
-
-            return response.data;
-        } catch (error) {
-            console.error('Error creating Trello card:', error);
-            throw new Error('Failed to create Trello card');
-        }
-    }
-
-    async updateCard(task) {
-        try {
-            const response = await axios.put(`${this.baseUrl}/cards/${task.trello_card_id}`, {
-                key: this.apiKey,
-                token: this.token,
-                name: task.title,
-                desc: task.description,
-                due: task.deadline ? new Date(task.deadline).toISOString() : null,
-                idList: task.trello_list_id
-            });
-
-            return response.data;
-        } catch (error) {
-            console.error('Error updating Trello card:', error);
-            throw new Error('Failed to update Trello card');
-        }
-    }
-
-    async deleteCard(cardId) {
-        try {
-            await axios.delete(`${this.baseUrl}/cards/${cardId}`, {
-                params: {
-                    key: this.apiKey,
-                    token: this.token
-                }
-            });
-        } catch (error) {
-            console.error('Error deleting Trello card:', error);
-            throw new Error('Failed to delete Trello card');
-        }
-    }
-
-    async getBoards() {
-        try {
-            const response = await axios.get(`${this.baseUrl}/members/me/boards`, {
-                params: {
-                    key: this.apiKey,
-                    token: this.token
-                }
-            });
-
-            return response.data;
-        } catch (error) {
-            console.error('Error getting Trello boards:', error);
-            throw new Error('Failed to get Trello boards');
-        }
-    }
-
-    async getLists(boardId) {
-        try {
-            const response = await axios.get(`${this.baseUrl}/boards/${boardId}/lists`, {
-                params: {
-                    key: this.apiKey,
-                    token: this.token
-                }
-            });
-
-            return response.data;
-        } catch (error) {
-            console.error('Error getting Trello lists:', error);
-            throw new Error('Failed to get Trello lists');
-        }
-    }
+if (!API_KEY || !API_TOKEN) {
+  console.error('❌ Missing TRELLO_API_KEY or TRELLO_API_TOKEN in .env');
+  throw new Error('❌ Missing TRELLO_API_KEY or TRELLO_API_TOKEN in .env');
 }
 
-module.exports = new TrelloService(); 
+/**
+ * Gửi request tới Trello API
+ * @param {string} method - Phương thức HTTP (GET, POST, PUT, DELETE)
+ * @param {string} endpoint - Đường dẫn endpoint của Trello API
+ * @param {object} [data={}] - Dữ liệu gửi lên (body hoặc query)
+ * @param {object} [config={}] - Cấu hình Axios bổ sung
+ * @returns {Promise<any>} - Kết quả từ Trello API
+ */
+const trelloRequest = async (method, endpoint, data = {}, config = {}) => {
+  const url = `${BASE_URL}${endpoint}${endpoint.includes('?') ? '&' : '?'}key=${API_KEY}&token=${API_TOKEN}`;
+  try {
+    const response = await axios({
+      method,
+      url,
+      timeout: 15000,
+      ...(method === 'get' ? { params: data } : { data }),
+      ...config
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`❌ Trello API ${method.toUpperCase()} ${endpoint} error:`, error.response?.data || error.message);
+    throw new Error(error.response?.data?.message || error.message || 'Trello API error');
+  }
+};
+
+// -----------------------------------------------------------------------------
+//  Boards
+// -----------------------------------------------------------------------------
+exports.getBoards = async () => {
+  return trelloRequest('get', '/members/me/boards');
+};
+
+exports.createBoard = async (name, opts = { defaultLists: false }) => {
+  if (!name) throw new Error('❌ Board name is required');
+  return trelloRequest('post', '/boards', { name, ...opts });
+};
+
+// -----------------------------------------------------------------------------
+//  Lists
+// -----------------------------------------------------------------------------
+exports.getListsInBoard = async (boardId) => {
+  if (!boardId) throw new Error('❌ Board ID is required');
+  return trelloRequest('get', `/boards/${boardId}/lists`);
+};
+
+exports.createList = async (boardId, name) => {
+  if (!boardId || !name) throw new Error('❌ Board ID và List name là bắt buộc');
+  return trelloRequest('post', `/boards/${boardId}/lists`, { name });
+};
+
+// -----------------------------------------------------------------------------
+//  Cards
+// -----------------------------------------------------------------------------
+exports.getCardsInList = async (listId) => {
+  if (!listId) throw new Error('❌ List ID là bắt buộc');
+  return trelloRequest('get', `/lists/${listId}/cards`);
+};
+
+exports.createCard = async (listId, title, description = '', deadline = null) => {
+  if (!listId || !title) throw new Error('❌ List ID và Card name là bắt buộc');
+  return trelloRequest('post', '/cards', {
+    idList: listId,
+    name: title,
+    desc: description,
+    due: deadline
+  });
+};
+
+exports.updateCard = async (cardId, fields) => {
+  if (!cardId) throw new Error('❌ Card ID là bắt buộc');
+  return trelloRequest('put', `/cards/${cardId}`, fields);
+};
+
+exports.archiveCard = async (cardId) => {
+  if (!cardId) throw new Error('❌ Card ID là bắt buộc');
+  return trelloRequest('put', `/cards/${cardId}/closed`, { value: true });
+};

@@ -1,0 +1,60 @@
+{{!-- views/trello/index.handlebars --}}
+{{#> main title="Trello Boards"}}
+<div class="container mt-4">
+  <h2>
+    <i class="fab fa-trello me-2"></i>Meeting Lists
+  </h2>
+
+  <div id="sync-status" class="alert alert-info d-none"></div>
+
+  {{#if boards.length}}
+  <div class="row">
+    {{#each boards}}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">{{this.name}}</h5>
+          <a href="/trello/boards/{{this.id}}/lists" class="btn btn-primary">
+            View Details
+          </a>
+        </div>
+      </div>
+    </div>
+    {{/each}}
+  </div>
+  {{else}}
+  <div class="text-center py-5">
+    <i class="fab fa-trello fa-3x text-muted mb-3"></i>
+    <h4>No Boards Found</h4>
+    <p class="text-muted">Connect your Trello account to get started.</p>
+  </div>
+  {{/if}}
+</div>
+
+<!-- Script để gọi AJAX -->
+<script>
+  document.getElementById("sync-trello").addEventListener("click", async function () {
+    try {
+      const response = await fetch("/trello/sync", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        }
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert("Đồng bộ với Trello thành công!");
+      } else {
+        alert("Đồng bộ thất bại. " + result.message);
+      }
+    } catch (error) {
+      console.error("Error syncing with Trello:", error);
+      alert("Đồng bộ thất bại. Vui lòng thử lại.");
+    }
+  });
+</script>
+
+{{/main}}

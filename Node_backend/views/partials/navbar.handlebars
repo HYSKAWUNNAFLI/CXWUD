@@ -16,13 +16,18 @@
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link {{#if (eq active 'meetings')}}active{{/if}}" href="/meetings">{{!xsưdcdưc}}
+          <a class="nav-link {{#if (eq active 'meetings')}}active{{/if}}" href="/meetings">
             <i class="fas fa-calendar-alt me-1"></i>Meetings
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link {{#if (eq active 'tasks')}}active{{/if}}" href="/tasks">
             <i class="fas fa-tasks me-1"></i>Tasks
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {{#if (eq active 'trello')}}active{{/if}}" href="/trello">
+            <i class="fab fa-trello me-1"></i>Meeting Details
           </a>
         </li>
         {{/if}}
@@ -69,4 +74,4 @@
       </ul>
     </div>
   </div>
-</nav> 
+</nav>

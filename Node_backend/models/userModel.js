@@ -57,17 +57,28 @@ User.prototype.checkPassword = async function(password) {
   return hashedPassword === this.password;
 };
 
+// 🔗 Associations
 User.associate = (models) => {
   User.hasMany(models.MeetingLog, {
     foreignKey: 'created_by',
-    as: 'meetingLogs'
+    as: 'meetingLogs',
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE'
   });
-  
-  
   
   User.hasMany(models.Task, {
     foreignKey: 'created_by',
-    as: 'createdTasks'
+    as: 'createdTasks',
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE'
+  });
+  
+  User.hasMany(models.Task, {
+    foreignKey: 'assignee_name',
+    sourceKey: 'name',  // Liên kết với 'name' thay vì 'id'
+    as: 'assignedTasks',
+    onUpdate: 'CASCADE',
+    onDelete: 'SET NULL'
   });
 };
 

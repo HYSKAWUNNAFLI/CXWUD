@@ -14,7 +14,7 @@ const Task = sequelize.define('Task', {
     description: {
         type: DataTypes.TEXT,
         allowNull: true
-    },  
+    },
     assignee_name: {
         type: DataTypes.STRING,
         allowNull: true
@@ -28,16 +28,28 @@ const Task = sequelize.define('Task', {
         defaultValue: 'MEDIUM'
     },
     status: {
-        type: DataTypes.ENUM('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED','TODO'),
+        type: DataTypes.ENUM('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'TODO'),
         defaultValue: 'NOT_STARTED'
     },
     meeting_id: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+            model: 'MeetingLogs',
+            key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     created_by: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+            model: 'Users',
+            key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
     },
     trello_card_id: {
         type: DataTypes.STRING,
@@ -58,17 +70,22 @@ const Task = sequelize.define('Task', {
     updatedAt: 'updated_at'
 });
 
+// 🔗 Associations
 Task.associate = (models) => {
     Task.belongsTo(models.MeetingLog, {
         foreignKey: 'meeting_id',
         as: 'meetingLog'
     });
-    
- 
-    
+
     Task.belongsTo(models.User, {
         foreignKey: 'created_by',
         as: 'creator'
+    });
+
+    Task.belongsTo(models.User, {
+        foreignKey: 'assignee_name',
+        targetKey: 'name',
+        as: 'assignee'
     });
 };
 

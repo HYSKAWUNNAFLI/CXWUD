@@ -41,7 +41,13 @@ const MeetingLog = sequelize.define("MeetingLog", {
   },
   created_by: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
+    references: {
+      model: 'Users',
+      key: 'id'
+    },
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE'
   }
 }, {
   tableName: 'MeetingLogs',
@@ -50,10 +56,13 @@ const MeetingLog = sequelize.define("MeetingLog", {
   updatedAt: 'updated_at'
 });
 
+// 🔗 Associations
 MeetingLog.associate = (models) => {
   MeetingLog.hasMany(models.Task, {
     foreignKey: 'meeting_id',
-    as: 'tasks'
+    as: 'tasks',
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE'
   });
   
   MeetingLog.belongsTo(models.User, {

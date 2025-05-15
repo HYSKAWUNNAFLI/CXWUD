@@ -30,32 +30,6 @@
         </div>
         <div class="card-body">
           <p class="card-text">{{truncate this.content 200}}</p>
-          <h6 class="mt-3">
-            <i class="fas fa-tasks me-2"></i>Tasks
-          </h6>
-          <div class="task-list">
-            {{#each this.tasks}}
-            <div class="list-group-item task-item {{toLowerCase this.status}}">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <strong>{{this.task_name}}</strong>
-                  {{#if this.assignee}}
-                  <br>
-                  <small class="text-muted">
-                    <i class="fas fa-user me-1"></i>
-                    {{this.assignee}}
-                  </small>
-                  {{/if}}
-                </div>
-                <div class="text-end">
-                  <span class="badge bg-{{getStatusColor this.status}}">{{this.status}}</span>
-                  <br>
-                  <span class="badge bg-{{getPriorityColor this.priority}}">{{this.priority}}</span>
-                </div>
-              </div>
-            </div>
-            {{/each}}
-          </div>
         </div>
         <div class="card-footer">
           <a href="/meetings/{{this.id}}" class="btn btn-sm btn-outline-primary">

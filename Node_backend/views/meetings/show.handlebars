@@ -39,68 +39,6 @@
       </div>
     </div>
 
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="card-title mb-0">
-            <i class="fas fa-tasks me-2"></i>Tasks
-          </h5>
-          <span class="badge bg-primary">{{meeting.tasks.length}} tasks</span>
-        </div>
-        <div class="card-body p-0">
-          <div class="list-group list-group-flush task-list">
-            {{#each meeting.tasks}}
-            <div class="list-group-item task-item {{toLowerCase this.status}}">
-              <div class="d-flex justify-content-between align-items-start">
-                <div>
-                  <h6 class="mb-1">{{this.task_name}}</h6>
-                  {{#if this.assignee_name}}
-                  <small class="text-muted">
-                    <i class="fas fa-user me-1"></i>
-                    {{this.assignee_name}}
-                  </small>
-                  {{/if}}
-                  {{#if this.deadline}}
-                  <br>
-                  <small class="text-muted">
-                    <i class="far fa-clock me-1"></i>
-                    Due: {{formatDate this.deadline}}
-                  </small>
-                  {{/if}}
-                </div>
-                <div class="text-end">
-                  <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                      <span class="badge bg-{{getStatusColor this.status}}">{{this.status}}</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                      <li>
-                        <a class="dropdown-item status-toggle" href="#" data-task-id="{{this.id}}" data-status="TODO">
-                          <span class="badge bg-secondary">TODO</span>
-                        </a>
-                      </li>
-                      <li>
-                        <a class="dropdown-item status-toggle" href="#" data-task-id="{{this.id}}" data-status="IN_PROGRESS">
-                          <span class="badge bg-primary">IN_PROGRESS</span>
-                        </a>
-                      </li>
-                      <li>
-                        <a class="dropdown-item status-toggle" href="#" data-task-id="{{this.id}}" data-status="COMPLETED">
-                          <span class="badge bg-success">COMPLETED</span>
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                  <br>
-                  <span class="badge bg-{{getPriorityColor this.priority}}">{{this.priority}}</span>
-                </div>
-              </div>
-            </div>
-            {{/each}}
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 

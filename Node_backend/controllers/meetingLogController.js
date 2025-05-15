@@ -8,7 +8,7 @@ const axios = require('axios');
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
 const geminiService = require('../services/geminiService');
-
+const trelloService = require('../services/trelloService'); 
 
 
 // Multer setup
@@ -92,20 +92,53 @@ class MeetingLogController {
           });
       
           // ✅ Ghi tasks vào DB nếu có
-          if (tasks?.length > 0) {
-            const formattedTasks = tasks.map(t => ({
-              title: t.task_name,
-              description: t.task_name,
-              assignee_name: t.assignee_name || t.assignee || 'Unassigned',
-              deadline: t.deadline || null,
-              priority: t.priority || 'MEDIUM',
-              status: 'NOT_STARTED',
-              meeting_id: log.id,
-              created_by: user_id
-            }));
-      
-            await Task.bulkCreate(formattedTasks);
-          }
+          // ✅ Ghi tasks vào DB nếu có
+if (tasks?.length > 0) {
+    const formattedTasks = tasks.map(t => ({
+        title: t.task_name,
+        description: t.task_name,
+        assignee_name: t.assignee_name || t.assignee || 'Unassigned',
+        deadline: t.deadline || null,
+        priority: t.priority || 'MEDIUM',
+        status: 'NOT_STARTED',
+        meeting_id: log.id,
+        created_by: user_id
+    }));
+
+    // 🔄 Ghi vào database trước khi đồng bộ
+    await Task.bulkCreate(formattedTasks);
+
+    // ✅ Tạo Board trên Trello
+    const board = await trelloService.createBoard(log.title);
+
+    // Tạo List theo Assignee
+    const assignees = [...new Set(formattedTasks.map(t => t.assignee_name))];
+    for (const assignee of assignees) {
+        const list = await trelloService.createList(board.id, assignee);
+        const tasksForAssignee = formattedTasks.filter(t => t.assignee_name === assignee);
+
+        for (const task of tasksForAssignee) {
+            const card = await trelloService.createCard(
+                list.id,
+                task.title,
+                task.description,
+                task.deadline
+            );
+
+            // 🔄 Cập nhật trạng thái SYNCED
+            await Task.update({
+                trello_card_id: card.id,
+                trello_list_id: list.id,
+                last_synced_with_trello: new Date()
+            }, { where: { title: task.title, meeting_id: log.id } });
+        }
+    }
+
+    // Cập nhật trạng thái meeting
+    await log.update({ status: 'COMPLETED' });
+    console.log(`✅ Meeting '${log.title}' đồng bộ với Trello thành công!`);
+}
+
       
           res.redirect('/meetings');
       
