@@ -42,14 +42,12 @@ app.set("views", path.join(__dirname, "views"));
 // Import routes
 const authRoutes = require("./routes/authRoutes");
 const meetingLogRoutes = require("./routes/meetingLogRoutes");
-const taskRoutes = require("./routes/taskRoutes");
 const uploadRouters = require("./routes/uploadRouters");
 const userRouters = require("./routes/userRouters");
 
 // Cấu hình các routes
 app.use("/auth", authRoutes);
 app.use("/meetings", authMiddleware, meetingLogRoutes);
-app.use("/tasks", authMiddleware, taskRoutes);
 app.use("/upload", authMiddleware, uploadRouters);
 app.use("/users", authMiddleware, userRouters);
 
